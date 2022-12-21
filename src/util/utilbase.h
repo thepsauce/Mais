@@ -1,3 +1,54 @@
+/* Array utility */
+struct array {
+	u32 cap, cnt, size;
+	u8 elems[0];
+};
+
+typedef int (*comparator)(const void*, const void*);
+
+/* array example(int array):
+int *array;
+int *result;
+int index;
+
+array = arrcreate(10, sizeof*array);
+array = arradd(array, 22);
+array = arradd(array, 41);
+array = arradd(array, 0);
+result = arrfindmem(array, &(int) {  41 });
+index = 0;
+arrfree(array);
+*/
+// creates a new array
+void *arrcreate(u32 initCap, u32 elemSize);
+// returns the number of elements
+u32 arrcount(void *ptr);
+// grows to given capacity
+void *arrgrow(void *ptr, u32 cap);
+// adds a new element
+void *arradd(void *ptr, const void *elem);
+// removes an element
+void *arrremove(void *ptr, u32 index);
+// finds given element and using given compare function
+void *arrfind(void *ptr, const void *elem, comparator compare);
+// finds a pointer by comparing the address of each pointer element with the given element like this:
+// if(*(void**) p == elem) 
+// it assumes that the pointer holds values of type void*
+void *arrfindptr(void *ptr, const void *elem);
+// finds given string
+// if(!strcmp((char*) p, str))
+void *arrfindstr(void *ptr, const char *str);
+// finds given memory
+// if(!memcmp(p, elem, elemSize))
+void *arrfindmem(void *ptr, const void *elem);
+// sorts the array, following given compare function
+void arrsort(void *ptr, comparator compare);
+// duplicates the array
+void *arrdup(void *ptr);
+void *arrget(void *ptr, u32 index);
+// frees the array
+void arrfree(void *ptr);
+
 /* Buffer utility */
 typedef struct buf {
     char *buf;
