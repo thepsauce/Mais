@@ -78,19 +78,9 @@ global long pstell(struct parser *parser)
 
 global int psaddlabel(struct parser *parser, const struct label *label, bool push)
 {
-	arradd(parser->scopes, 
 	if(push)
-	{
-		if(parser->scopeCnt + 1 > parser->scopeCap)
-		{
-			parser->scopeCap *= 2;
-			parser->scopeCap++;
-			parser->scopes = realloc(parser->scopes, sizeof(*parser->scopes) * parser->scopeCap);
-		}
-		parser->scopes[parser->scopeCnt++] = parser->labelCnt;
-	}
-	parser->labels = realloc(parser->labels, sizeof(*parser->labels) * (parser->labelCnt + 1));
-	parser->labels[parser->labelCnt++] = *label;
+		arradd(parser->scopes, &parser->labelCnt);
+	arradd(scope->labels, label);
 	return 0;
 }
 
