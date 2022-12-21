@@ -34,7 +34,8 @@ global void *arradd(void *ptr, const void *elem)
 		arr = realloc(arr, sizeof(*arr) + arr->size * arr->cap);
 	}
 	ptr = (void*) arr + sizeof(*arr);
-	memcpy(ptr + arr->size * arr->cnt, elem, arr->size);
+	if(elem)
+		memcpy(ptr + arr->size * arr->cnt, elem, arr->size);
 	arr->cnt++;
 	return ptr;
 }

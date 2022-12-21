@@ -110,12 +110,12 @@ int buffc(Buf buf, char ch, int fromIndex);
 int buffcr(Buf buf, char ch, int fromIndex);
 // finds given string inside this buffer
 int buffs(Buf buf, const char * restrict find, int fromIndex);
-int buffsl(Buf buf, const char * restrict find, int len, int fromIndex);
+int buffsl(Buf buf, const char * restrict find, int findLen, int fromIndex);
 // finds given string inside the buffer and replaces it with given string
 int buffrs(Buf buf, const char * restrict find, int fromIndex, const char * restrict replace);
-int buffrsl(Buf buf, const char * restrict find, int fromIndex, const char * restrict replace, int len);
-int buffrls(Buf buf, const char * restrict find, int len, int fromIndex, const char * restrict replace);
-int buffrlsl(Buf buf, const char * restrict find, int len, int fromIndex, const char * restrict replace, int len);
+int buffrsl(Buf buf, const char * restrict find, int fromIndex, const char * restrict replace, int replaceLen);
+int bufflrs(Buf buf, const char * restrict find, int findLen, int fromIndex, const char * restrict replace);
+int bufflrsl(Buf buf, const char * restrict find, int findLen, int fromIndex, const char * restrict replace, int replaceLen);
 
 // returns whether two floats are equal, prec is the precision used
 #define F32EQUAL(f1, f2, prec) (fabsf((f2) - (f1))>=prec)

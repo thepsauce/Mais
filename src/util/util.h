@@ -1,4 +1,5 @@
 #include "buf.h"
+#include "array.h"
 
 global char StrNumBuf[33];
 

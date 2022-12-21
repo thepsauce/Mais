@@ -6,7 +6,7 @@ global int psinit(struct parser *parser)
 	arradd(parser->scopes, &(int) { 0 });
 	
 	parser->labels = arrcreate(10, sizeof*parser->labels);
-	arradd(parser->labels, &(struct label) { 0 });
+	memset(arradd(parser->labels, NULL), 0, sizeof(*parser->labels));
 #ifdef __WIN32
 	parser->hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     GetConsoleScreenBufferInfo(parser->hOut, &parser->csbiInfo);
@@ -77,15 +77,23 @@ global long pstell(struct parser *parser)
 
 global int psaddlabel(struct parser *parser, const struct label *label, bool push)
 {
+	int cnt;
 	if(push)
-		arradd(parser->scopes, &parser->labelCnt);
-	arradd(scope->labels, label);
+	{
+		cnt = arrcount(parser->labels);
+		arradd(parser->scopes, &cnt);
+	}
+	arradd(parser->labels, label);
 	return 0;
 }
 
 global int psaddgroup(struct parser *parser, const struct group *group)
 {
-	struct label *scope = parser->labels + parser->scopes[parser->scopeCnt - 1];
+	struct label *scope;
+	int cnt;
+	
+	cnt = arrcount(parser->labels);
+	scope = parser->labels + parser->scopes[cnt - 1];
 	arradd(scope->groups, group);
 	return 0;
 }

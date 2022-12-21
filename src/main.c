@@ -26,6 +26,50 @@ char *strndup(const char *str, size_t len)
 #include "util/util.h"
 #include "compile/compile.h"
 
+local int printtok(const struct token *tok)
+{
+	assert(tok != NULL && "printtok > error: token is null\n");
+    printf("%ld: ", tok->pos);
+    switch(tok->type)
+    {
+    case TOKEOF:
+        printf("EOF");
+        break;
+    case TOKNUMBER:
+        printf("NUMBER: %I64d", tok->l);
+        break;
+    case TOKSTRING:
+        printf("STRING: \"%.*s\"", tok->strLen, tok->str);
+        break;
+    case TOKWORD:
+        printf("WORD: %s", tok->word);
+        break;
+    case TOKANY:
+		switch(tok->c)
+		{
+		case 0x100:
+			printf("CHAR: '<<'");
+			break;
+		case 0x101:
+			printf("CHAR: '>>'");
+			break;
+		case 0x102:
+			printf("CHAR: '!!'");
+			break;
+		default:
+			printf("CHAR: '%c'", tok->c);
+		}
+        break;
+    case TOKKEYWORD:
+        printf("KEYWORD: %s", tok->word);
+        break;
+    default:
+        printf("CORRUPT TOKEN");
+        break;
+    }
+	return 0;
+}
+
 int main(void)
 {
 	struct parser parser;

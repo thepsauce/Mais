@@ -268,42 +268,47 @@ static inline int _buffsl(const char * restrict str, int len, const char * restr
 
 int buffs(Buf buf, const char * restrict find, int fromIndex)
 {
-	return buffs(buf, find, strlen(find), fromIndex);
+	return buffsl(buf, find, strlen(find), fromIndex);
 }
 
 int buffsl(Buf buf, const char * restrict find, int findLen, int fromIndex)
 {
     if(!find || !findLen)
         return -1;
-    return _buffs(buf->buf, buf->len, find, findLen, fromIndex);
+    return _buffsl(buf->buf, buf->len, find, findLen, fromIndex);
 }
 
 int buffrs(Buf buf, const char * restrict find, int fromIndex, const char * restrict replace)
 {
-	return buffrsl(buf, find, strlen(find), fromIndex, replace, strlen(replace));
+	return bufflrsl(buf, find, strlen(find), fromIndex, replace, strlen(replace));
 }
 
 int buffrsl(Buf buf, const char * restrict find, int fromIndex, const char * restrict replace, int replaceLen)
 {
-	return buffrsl(buf, find, strlen(find), fromIndex, replace, replaceLen);
+	return bufflrsl(buf, find, strlen(find), fromIndex, replace, replaceLen);
 }
 
 int bufflrs(Buf buf, const char * restrict find, int findLen, int fromIndex, const char * restrict replace)
 {
-	return buffrsl(buf, find, findLen, fromIndex, replace);
+	return bufflrsl(buf, find, findLen, fromIndex, replace, strlen(replace));
 }
 
-int buffrsl(Buf buf, const char * restrict find, int findLen, int fromIndex, const char * restrict replace, int replaceLen)
+int bufflrsl(Buf buf, const char * restrict find, int findLen, int fromIndex, const char * restrict replace, int replaceLen)
 {
     char *txt;
     int aLen;
     int index;
     if(!find || !findLen)
         return -1;
-    if((index = _buffs(buf->buf, buf->len, find, findLen, fromIndex)) < 0)
+    if((index = _buffsl(buf->buf, buf->len, find, findLen, fromIndex)) < 0)
         return -1;
-    rLen = strlen(replace);
     aLen = findLen - replaceLen;
+	if(buf->len + aLen > buf->cap)
+	{
+		buf->cap *= 2;
+		buf->cap += aLen;
+		buf->buf = realloc(buf->buf, buf->cap);
+	}
     txt = buf->buf + index;
     memmove(txt, txt + aLen, buf->len - index - aLen);
     memcpy(txt, replace, replaceLen);
