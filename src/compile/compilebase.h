@@ -146,8 +146,7 @@ struct type {
 	char *genericName; // for <[genericName]>
 	char *name; // for dt [name]
 	struct type *generic; // for dt [name]<[generic]>
-	struct label *params; // for df([params, paramCnt]) [ret]
-	int paramCnt; // for df([params, paramCnt]) [ret]
+	struct label *params; // array for df([params, paramCnt]) [ret]
 	struct type *ret; // for df([params, paramCnt]) [ret]
 };
 
@@ -170,7 +169,6 @@ struct label {
 	struct label *children;
 	int childCnt;
 	struct group *groups;
-	int groupCnt;
 	int jump; // index of group to jump to
 	// function
     struct label *params;
@@ -253,7 +251,6 @@ struct group {
         };
         struct { // call
             struct group *args;
-            int argCnt;
             char *calling;
             struct group *into;
         };
