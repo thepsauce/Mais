@@ -57,6 +57,17 @@ void *arrget(void *ptr, u32 index);
 // frees the array
 void arrfree(void *ptr);
 
+/* Bool256 */
+struct bool256 { // warning: bold assumption that u16 is in fact 2 bytes
+	u16 bits[256 / 8 / sizeof(u16)];
+};
+// check if bit number b is toggled
+#define B256CHECK(b256, b) ({u8 _CHECK_b=(u8)(b); (b256)->bits[_CHECK_b>>4]&(1<<(_CHECK_b&0xF));})
+// set bit number b
+#define B256SET(b256, b) ({u8 _SET_b=(u8)(b); (b256)->bits[_SET_b>>4]|=(1<<(_SET_b&0xF));})
+// toggle bit number b (xor)
+#define B256TOGGLE(b256, b) ({u8 _TOGGLE_b=(u8)(b); (b256)->bits[_TOGGLE_b>>4]^=(1<<(_TOGGLE_b&0xF));})
+
 /* Buffer utility */
 typedef struct buf {
     char *buf;
