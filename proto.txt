@@ -1,0 +1,56 @@
+inc i
+dec i
+mul i, i
+
+typedef E {
+	inc i
+	dec i
+	dec i
+}
+
+typedef [U] {
+	inc i
+	dec i
+	dec i
+}
+
+typedef [T]<A> {
+	inc i
+	dec i
+	dec i
+}
+
+typedef [R] : U {
+	inc i
+	dec i
+	dec i
+}
+
+typedef [B] : T<TYPE> {
+
+}
+
+typedef [List]<E> {
+
+
+}
+
+typedef [Array]<E> : List<E> {
+	elems: [<E>]
+    elemCnt: dd ?
+	elemCap: dd ?
+}
+
+typedef [Node]<E> {
+	data: <E>
+	prev: dt Node<dt Node<E> >
+	next: dt Node<E>
+}
+
+typedef [Linked]<E> : List<E> {
+	head: dt Node<E>
+	root: dt Node<E>
+}
+
+
+goto:
