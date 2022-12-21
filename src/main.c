@@ -1,10 +1,11 @@
+#include <assert.h>
+#include <ctype.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <string.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
-#include <string.h>
-#include <stdbool.h>
-#include <stdarg.h>
-#include <assert.h>
 // in case this function is missing
 char *strndup(const char *str, size_t len)
 {
