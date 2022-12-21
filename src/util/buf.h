@@ -1,11 +1,3 @@
-char *strndup(const char *str, size_t len)
-{
-    char *s = malloc(len + 1);
-    memcpy(s, str, len);
-    s[len] = 0;
-    return s;
-}
-
 void bufinits(Buf buf, const char *str)
 {
 	int l = strlen(str);
