@@ -24,7 +24,7 @@ int main(void)
 	
 	psinit(&parser);
 	// test the tokenizer
-    psopen(&parser, "proto.txt");
+    psopen(&parser, "../proto.txt");
     while(psreadtok(&parser) != EOF)
     {
         printtok(&parser.tok);
