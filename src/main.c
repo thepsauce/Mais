@@ -5,6 +5,14 @@
 #include <stdbool.h>
 #include <stdarg.h>
 #include <assert.h>
+// in case this function is missing
+char *strndup(const char *str, size_t len)
+{
+    char *s = malloc(len + 1);
+    memcpy(s, str, len);
+    s[len] = 0;
+    return s;
+}
 
 #ifdef __WIN32
 	#include <windows.h>
