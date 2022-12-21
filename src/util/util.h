@@ -48,28 +48,3 @@ global const char *strnum(u32 num, int radix)
     }
     return buf;
 }
-
-global int throwerror(File file, int pos, const char *err, ...)
-{
-    int line = 1;
-    int col = 1;
-    int oldPos;
-    oldPos = ftell(file);
-    fseek(file, 0, SEEK_SET);
-    while(pos != ftell(file))
-        if(fgetc(file) == '\n')
-        {
-            line++;
-            col = 1;
-        }
-        else
-            col++;
-    printf("error at line %d, %d: ", line, col);
-    va_list args;
-    va_start(args, err);
-    vprintf(err, args);
-    va_end(args);
-    exit(-1);
-    fseek(file, oldPos, SEEK_SET);
-    return -1;
-}
