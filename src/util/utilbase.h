@@ -1,43 +1,83 @@
+/* Buffer utility */
 typedef struct buf {
     char *buf;
     int len, cap;
 } *Buf;
 
-#define bufinit(b) memset((b), 0, sizeof(struct buf)) // initialize to 0
+// note: a function in many cases ends in either s or sl:
+//   s - which stands for null-terminated string
+//   sl - stands for string with length len
+
+// memset buffer to 0
+#define bufinit(b) memset((b), 0, sizeof(struct buf))
+// initialize buffer not to 0 but any null-terminated string
 void bufinits(Buf buf, const char *str);
+// initialize buffer to any string of length len
 void bufinitsl(Buf buf, const char *str, int len);
-#define bufl(b, l) ((b)->len = (l)) // set length
-bool bufs(struct buf *buf, const char *str);
+// important: all the following buffer functions should only be used after the buffer was initialized
+// set length of buffer
+#define bufl(b, l) ((b)->len = (l))
+// sets buffer to a string
+bool bufs(Buf buf, const char *str);
 bool bufsl(Buf buf, const char *str, int len);
-bool bufr(Buf buf, FILE *fp);
-bool bufw(Buf buf, FILE *fp);
+// allocates a string of length len and copies the region from index to index + len into that string and returns it
 char *bufcv(Buf buf, int index, int len);
+// extracts this buffer as null-terminated string and frees the buffer, note that after this, the buffer has to be re-initialized if used any further
 char *bufexd(Buf buf);
+// extracts this buffer as null-terminated string but doesn't free it
 char *bufex(Buf buf);
+// appends the string with given format and var args, similar to sprintf
 int buff(Buf buf, const char *fmt, ...);
+// appends a string
 char *bufas(Buf buf, const char *apd);
 char *bufasl(Buf buf, const char *apd, int len);
+// inserts a char at given index
 char *bufic(Buf buf, int index, char ch);
+// appends a char
 char *bufac(Buf buf, char ch);
+// inserts a string
 char *bufis(Buf buf, int index, const char *ins);
 char *bufisl(Buf buf, int index, const char *ins, int len);
-char *bufris(Buf buf, int index, int rem, const char *ins, int len);
+// removes the section from index to index+rem and replaces it with given string
+char *bufris(Buf buf, int index, int rem, const char *ins);
+char *bufrisl(Buf buf, int index, int rem, const char *ins, int len);
+// removes char at given index
 #define bufrca(b, index) bufrra((b), (index), 1)
+// removes range from fromIndex to fromIndex+removeLen
 bool bufrra(Buf buf, int fromIndex, int removeLen);
+// finds given char, starting from the index
 int buffc(Buf buf, char ch, int fromIndex);
+// does the same as buffc but searching in reverse
+int buffcr(Buf buf, char ch, int fromIndex);
+// finds given string inside this buffer
 int buffs(Buf buf, const char * restrict find, int fromIndex);
+int buffsl(Buf buf, const char * restrict find, int len, int fromIndex);
+// finds given string inside the buffer and replaces it with given string
 int buffrs(Buf buf, const char * restrict find, int fromIndex, const char * restrict replace);
+int buffrsl(Buf buf, const char * restrict find, int fromIndex, const char * restrict replace, int len);
+int buffrls(Buf buf, const char * restrict find, int len, int fromIndex, const char * restrict replace);
+int buffrlsl(Buf buf, const char * restrict find, int len, int fromIndex, const char * restrict replace, int len);
 
+// returns whether two floats are equal, prec is the precision used
 #define F32EQUAL(f1, f2, prec) (fabsf((f2) - (f1))>=prec)
 #define F64EQUAL(f1, f2, prec) (fabs((f2) - (f1))>=prec)
 
+/* Utility for static array */
+// length of static array
 #define ARRLEN(a) (sizeof(a)/sizeof*(a))
-
+// for each header for static array
+// usage example:
+// int arr[5];
+// int v;
+// ARRFOREACH(v, arr)
+// {
+//    printf("%d\n", v);
+// }
 #define ARRFOREACH(var, array) \
 	for(int _ARRFOREACH_counter = 0;  \
 		_ARRFOREACH_counter < ARRLEN(array) && ((var = (array)[_ARRFOREACH_counter]) || 1); \
 		_ARRFOREACH_counter++)
-
+// searches for a target value inside static array
 #define ARRSEARCH(array, target) \
 ({ \
 	__label__ _ARRSEARCH_found; \
@@ -51,7 +91,7 @@ int buffrs(Buf buf, const char * restrict find, int fromIndex, const char * rest
 	_ARRSEARCH_found: \
 	_ARRSEARCH_index; \
 })
-
+// searches for string inside given static array
 #define ARRSTRSEARCH(array, target) \
 ({ \
 	__label__ _ARRSTRSEARCH_found; \
@@ -65,130 +105,5 @@ int buffrs(Buf buf, const char * restrict find, int fromIndex, const char * rest
 	_ARRSTRSEARCH_found: \
 	_ARRSEARCH_index; \
 })
-
-#define DARRGROW(arr, cap, newCap) \
-{ \
-	if((newCap) > cap) \
-	{ \
-		cap *= 2; \
-		cap++; \
-		arr = realloc(arr, sizeof(*arr) * cap); \
-	} \
-}
-
-#define DARRADD(arr, cnt, cap, elem) \
-{ \
-	DARRGROW(arr, cap, cnt + 1) \
-	arr[cnt++] = (elem); \
-}
-	
-#define DARRADDUNIQUE(arr, cnt, cap, elem) \
-{ \
-	__label__ _DARRADDUNIQUER_alreadyexists; \
-	__auto_type _DARRADDUNIQUE_elem = (elem); \
-	for(int i = 0; i < cnt; i++) \
-		if(arr[i] == _DARRADDUNIQUE_elem) \
-			goto _DARRADDUNIQUER_alreadyexists; \
-	if(cnt + 1 > cap) \
-	{ \
-		cap *= 2; \
-		cap++; \
-		arr = realloc(arr, sizeof(*arr) * cap); \
-	} \
-	arr[cnt++] = _DARRADDUNIQUE_elem; \
-	_DARRADDUNIQUER_alreadyexists:; \
-}
-	
-#define DARRADDUNIQUER(arr, cnt, cap, elem) \
-{ \
-	__label__ _DARRADDUNIQUER_alreadyexists; \
-	__auto_type _DARRADDUNIQUER_elem = (elem); \
-	if(cnt >= 0) \
-	for(__auto_type i = cnt - 1; i >= 0; i--) \
-		if(arr[i] == _DARRADDUNIQUER_elem) \
-			goto _DARRADDUNIQUER_alreadyexists; \
-	if(cnt + 1 > cap) \
-	{ \
-		cap *= 2; \
-		cap++; \
-		arr = realloc(arr, sizeof(*arr) * cap); \
-	} \
-	arr[cnt++] = _DARRADDUNIQUER_elem; \
-	_DARRADDUNIQUER_alreadyexists:; \
-}
-	
-#define DARRREMOVE(arr, cnt, elem) \
-{ \
-	typeof(arr) _DARRREMOVE_ptr; \
-	typeof(cnt) _DARRREMOVE_remain; \
-	__auto_type _DARRREMOVE_elem = (elem); \
-	for(_DARRREMOVE_ptr = arr, _DARRREMOVE_remain = cnt; _DARRREMOVE_remain--; _DARRREMOVE_ptr++) \
-		if(*_DARRREMOVE_ptr == _DARRREMOVE_elem) \
-		{ \
-			memmove(_DARRREMOVE_ptr, _DARRREMOVE_ptr + 1, sizeof(*_DARRREMOVE_ptr) * _DARRREMOVE_remain); \
-			cnt--; \
-			break; \
-		} \
-}
-
-#define DARRGROW2(arr, cnt, cap, newCap) \
-{ \
-	if(newCap > cap) \
-    { \
-		void *_DARRADD2_free; \
-		typeof(arr) _DARRADD2_newArr; \
-        cap++; \
-        cap *= 2; \
-        _DARRADD2_free = arr; \
-        _DARRADD2_newArr = malloc(sizeof(*_DARRADD2_newArr) * cap); \
-        if(arr) \
-            memcpy(_DARRADD2_newArr, arr, sizeof(*arr) * cnt); \
-        arr = _DARRADD2_newArr; \
-        free(_DARRADD2_free); \
-    } \
-}
-
-#define DARRADD2(arr, cnt, cap, elem) \
-{ \
-	__auto_type _DARRADD2_elem = (elem); \
-	if(cnt + 1 > cap) \
-    { \
-		void *_DARRADD2_free; \
-		typeof(arr) _DARRADD2_newArr; \
-        cap++; \
-        cap *= 2; \
-        _DARRADD2_free = arr; \
-        _DARRADD2_newArr = malloc(sizeof(*_DARRADD2_newArr) * cap); \
-        if(arr) \
-            memcpy(_DARRADD2_newArr, arr, sizeof(*arr) * cnt); \
-        _DARRADD2_newArr[cnt] = _DARRADD2_elem; \
-        arr = _DARRADD2_newArr; \
-        cnt++; \
-        free(_DARRADD2_free); \
-    } \
-    else \
-    { \
-        arr[cnt++] = _DARRADD2_elem; \
-    } \
-}
-
-#define DARRREMOVE2(arr, cnt, cap, elem) \
-{ \
-	__auto_type _DARRREMOVE2_elem = (elem); \
-	for(int i = 0; i < cnt; i++) \
-        if(arr[i] == _DARRREMOVE2_elem) \
-        { \
-			void *_DARRREMOVE2_free; \
-			typeof(arr) _DARRREMOVE2_newArr; \
-            _DARRREMOVE2_newArr = malloc(sizeof(*_DARRREMOVE2_newArr) * cap); \
-            memcpy(_DARRREMOVE2_newArr, scene->entities.elems, sizeof(*_DARRREMOVE2_newArr) * i); \
-            memcpy(_DARRREMOVE2_newArr + i, arr + i + 1, sizeof(*_DARRREMOVE2_newArr) * (cnt - 1 - i)); \
-            _DARRREMOVE2_free = arr; \
-            arr = _DARRREMOVE2_newArr; \
-            cnt--; \
-            free(_DARRREMOVE2_free); \
-			break; \
-        } \
-}
 
 const char *strnum(u32 num, int radix);
