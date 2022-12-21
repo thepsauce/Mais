@@ -41,9 +41,8 @@ global int pspeek(struct parser *parser)
 	if(!parser->nBuf)
 	{
 		parser->fOff = ftell(parser->file);
-		parser->buf[0] = parser->buf[parser->iBuf];
-		parser->nBuf = fread(parser->buf + 1, 1, sizeof(parser->buf) - 1, parser->file);
-		parser->iBuf = 1;
+		parser->nBuf = fread(parser->buf, 1, sizeof(parser->buf), parser->file);
+		parser->iBuf = 0;
 	}
 	if(!parser->nBuf)
 		return EOF;
