@@ -49,19 +49,6 @@ bool bufsl(Buf buf, const char *str, int len)
     return 0;
 }
 
-bool bufr(Buf buf, File file)
-{
-   char ch;
-   while(!feof(file) && (ch = fgetc(file)))
-        bufac(buf, ch);
-   return !!ch;
-}
-
-bool bufw(Buf buf, File file)
-{
-   return fwrite(buf->buf, 1, buf->len, file) == buf->len;
-}
-
 char *bufexd(Buf buf)
 {
     char *str;
@@ -173,8 +160,12 @@ char *bufisl(Buf buf, int index, const char *ins, int len)
     return txt;
 }
 
-// removes the characters from index where rem is the number of characters to remove and inserts the given string
-char *bufris(Buf buf, int index, int rem, const char *ins, int len)
+char *bufris(Buf buf, int index, int rem, const char *ins)
+{
+	return bufrisl(buf, index, rem, ins, strlen(ins));
+}
+
+char *bufrisl(Buf buf, int index, int rem, const char *ins, int len)
 {
     char *txt;
     int bufLen;
@@ -226,7 +217,17 @@ int buffc(Buf buf, char ch, int fromIndex)
     return -1;
 }
 
-static inline int _buffs(const char * restrict str, int len, const char * restrict find, int findLen, int fromIndex)
+int buffcr(Buf buf, char ch, int fromIndex)
+{
+    char *str = buf->buf + fromIndex;
+    int len = fromIndex;
+    while(len--)
+        if(*(str--) == ch)
+            return buf->len - len - 1;
+    return -1;
+}
+
+static inline int _buffsl(const char * restrict str, int len, const char * restrict find, int findLen, int fromIndex)
 {
     int sLen, matchCnt;
     sLen = len;
@@ -246,6 +247,8 @@ static inline int _buffs(const char * restrict str, int len, const char * restri
                 break;
         }
     }*/
+	str += fromIndex;
+	len -= fromIndex;
     while(len--)
     {
         if(*(find + matchCnt) == *str)
@@ -265,26 +268,45 @@ static inline int _buffs(const char * restrict str, int len, const char * restri
 
 int buffs(Buf buf, const char * restrict find, int fromIndex)
 {
-    int fLen;
-    if(!find || !(fLen = strlen(find)))
+	return buffs(buf, find, strlen(find), fromIndex);
+}
+
+int buffsl(Buf buf, const char * restrict find, int findLen, int fromIndex)
+{
+    if(!find || !findLen)
         return -1;
-    return _buffs(buf->buf, buf->len, find, fLen, fromIndex);
+    return _buffs(buf->buf, buf->len, find, findLen, fromIndex);
 }
 
 int buffrs(Buf buf, const char * restrict find, int fromIndex, const char * restrict replace)
 {
+	return buffrsl(buf, find, strlen(find), fromIndex, replace, strlen(replace));
+}
+
+int buffrsl(Buf buf, const char * restrict find, int fromIndex, const char * restrict replace, int replaceLen)
+{
+	return buffrsl(buf, find, strlen(find), fromIndex, replace, replaceLen);
+}
+
+int bufflrs(Buf buf, const char * restrict find, int findLen, int fromIndex, const char * restrict replace)
+{
+	return buffrsl(buf, find, findLen, fromIndex, replace);
+}
+
+int buffrsl(Buf buf, const char * restrict find, int findLen, int fromIndex, const char * restrict replace, int replaceLen)
+{
     char *txt;
-    int fLen, rLen, aLen;
+    int aLen;
     int index;
-    if(!find || !(fLen = strlen(find)))
+    if(!find || !findLen)
         return -1;
-    if((index = _buffs(buf->buf, buf->len, find, fLen, fromIndex)) < 0)
+    if((index = _buffs(buf->buf, buf->len, find, findLen, fromIndex)) < 0)
         return -1;
     rLen = strlen(replace);
-    aLen = fLen - rLen;
+    aLen = findLen - replaceLen;
     txt = buf->buf + index;
     memmove(txt, txt + aLen, buf->len - index - aLen);
-    memcpy(txt, replace, rLen);
+    memcpy(txt, replace, replaceLen);
     buf->len -= aLen;
     return index;
 }
