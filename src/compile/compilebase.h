@@ -53,9 +53,7 @@ struct parser {
 	bool failOnEof; // if this is true and psreadtok would return eof, an error is returned
 	
 	int *scopes; // this array stores indexes in the labels array, this way, we only need to keep one label array
-	int scopeCnt, scopeCap; // count and capacity of scope array
 	struct label *labels; // this array stores all labels like variables, functions, typedefs and gotos
-	int labelCnt, labelCap;  // count and capacity of label array
 };
 
 // initializes the parser struct
