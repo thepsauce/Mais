@@ -14,6 +14,13 @@ global int psinit(struct parser *parser)
 	return 0;
 }
 
+global int psdiscard(struct parser *parser)
+{
+	arrfree(parser->scopes);
+	arrfree(parser->labels);
+	return 0;
+}
+
 global int psopen(struct parser *parser, const char *filePath)
 {
 	File file;
