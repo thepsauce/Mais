@@ -9,14 +9,22 @@ typedef int (*comparator)(const void*, const void*);
 /* array example(int array):
 int *array;
 int *result;
+int *rem;
 int index;
 
 array = arrcreate(10, sizeof*array);
+// note that we have to say array = ... because the pointer might change due to realloc but if you are sure that your array has enough capacity, you may omit it
 array = arradd(array, 22);
-array = arradd(array, 41);
-array = arradd(array, 0);
+arradd(array, 41);
+arradd(array, 0);
 result = arrfindmem(array, &(int) {  41 });
-index = 0;
+if(result)
+{
+	index = result - array;
+	printf("Index of element %d: %d\n", *result, index);
+	rem = arrremove(array, index);
+	printf("Now removed element %d\n", *rem);
+}
 arrfree(array);
 */
 // creates a new array
