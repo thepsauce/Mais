@@ -1,6 +1,2 @@
 #include "token.h"
-#include "keyword.h"
-#include "expr.h"
-#include "data.h"
-#include "type.h"
 #include "parse.h"
