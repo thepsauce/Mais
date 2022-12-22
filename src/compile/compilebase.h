@@ -80,8 +80,6 @@ int psreadtok(struct parser *parser);
 int pspeektok(struct parser *parser);
 // throws an error
 int psthrow(struct parser *parser, const char *format, ...);
-// thors a warning
-int pswarn(struct parser *parser, const char *format, ...);
 // adds a new label to this parser, if push is true, this label is also pushed to the scope stack
 int psaddlabel(struct parser *parser, const struct label *label, bool push);
 // adds a new group to this parser
