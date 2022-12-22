@@ -241,7 +241,7 @@ global int parse(struct parser *parser)
 			if(cnt == 1)
 				err = psthrow(parser, "closing '}' doesn't match with an open one");
 			else
-				arrremove(parser->scopes, cnt - 1);
+				arrpop(parser->scopes);
 		}
 		else if(parser->tok.type == TOKWORD)
 		{
