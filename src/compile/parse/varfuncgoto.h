@@ -4,7 +4,7 @@
 // function: [name]: [name]([params]) [type] 
 // goto: [name]: 
 
-int parsevarfuncgoto(struct parser *parser, struct label *label)
+int parsevarfuncgoto(struct parser *parser)
 {
 
 
