@@ -157,3 +157,100 @@ global int psthrow(struct parser *parser, const char *format, ...)
 	printf("\n");
     return -1;
 }
+
+int parsedata(struct parser *parser, struct datapoint *dp);
+int parseexpr(struct parser *parser, struct group *group);
+int parsetypedef(struct parser *parser);
+int parsevarfuncgoto(struct parser *parser);
+
+#include "expr.h"
+#include "data.h"
+#include "type.h"
+#include "keyword.h"
+#include "typedef.h"
+#include "varfuncgoto.h"
+
+struct {
+	const char *word;
+	int (*parse)(struct parser *parser);
+} ParseMap[] = {
+	{ "typedef", parsetypedef },
+	{ "test", parsetest },
+	{ "jmp", parsejmp },
+	{ "jz", parsejz },
+	{ "jnz", parsejnz },
+	{ "je", parseje },
+	{ "jne", parsejne },
+	{ "jl", parsejl },
+	{ "jle", parsejle },
+	{ "jg", parsejg },
+	{ "jge", parsejge },
+	{ "ret", parseret },
+	{ "re", parsere },
+	{ "rne", parserne },
+	{ "rl", parserl },
+	{ "rg", parserg },
+	{ "rge", parserge },
+	{ "inc", parseinc },
+	{ "dec", parsedec },
+	{ "not", parsenot },
+	{ "and", parseand },
+	{ "or", parseor },
+	{ "xor", parsexor },
+	{ "lsh", parselsh },
+	{ "rsh", parsersh },
+	{ "add", parseadd },
+	{ "sub", parsesub },
+	{ "mul", parsemul },
+	{ "div", parsediv },
+	{ "mod", parsemod },
+	{ "neg", parseneg },
+	{ "fadd", parsefadd },
+	{ "fsub", parsefsub },
+	{ "fmul", parsefmul },
+	{ "fdiv", parsefdiv },
+	{ "fmod", parsefmod },
+	{ "fneg", parsefneg },
+	{ "mov", parsemov },
+	{ "call", parsecall },
+};
+
+global int parse(struct parser *parser)
+{
+	int err = 0;
+	int i;
+    while(parser->failOnEof = 0, psreadtok(parser) != EOF)
+    {
+		parser->failOnEof = 1;
+        if(parser->tok.type == TOKKEYWORD)
+		{
+			// TODO: implement perfect hash function for a hash table instead of linear search
+			for(i = 0; i < ARRLEN(ParseMap); i++)
+				if(!strcmp(ParseMap[i].word, parser->tok.word))
+				{
+					err |= ParseMap[i].parse(parser);
+					break;
+				}
+			if(i == ARRLEN(ParseMap))
+				err = psthrow(parser, "invalid use of keyword '%s'", parser->tok.word);
+		}
+		else if(tokischar(&parser->tok, '}'))
+		{
+			// exit scope
+			if(parser->scopeCnt == 1)
+				err = psthrow(parser, "closing '}' doesn't match with an open one");
+			else
+				parser->scopeCnt--;
+		}
+		else if(parser->tok.type == TOKWORD)
+		{
+			// variable, function or goto
+			err |= parsevarfuncgoto(parser);
+		}
+		else
+		{
+			err = psthrow(parser, "invalid token(%d)", parser->tok.type);
+		}
+    }
+    return err;
+}
