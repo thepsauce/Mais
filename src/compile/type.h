@@ -9,7 +9,7 @@
 // dt Class<dd>
 // [dt Class<dt Class<dd>>]
 
-int parsedata(struct parser *parser, struct type *type)
+int parsetype(struct parser *parser, struct type *type)
 {
 
 
