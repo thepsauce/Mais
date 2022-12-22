@@ -219,10 +219,10 @@ global int parse(struct parser *parser)
 {
 	int err = 0;
 	int i;
-    while(parser->failOnEof = 0, psreadtok(parser) != EOF)
-    {
+	while(parser->failOnEof = 0, psreadtok(parser) != EOF)
+	{
 		parser->failOnEof = 1;
-        if(parser->tok.type == TOKKEYWORD)
+		if(parser->tok.type == TOKKEYWORD)
 		{
 			// TODO: implement perfect hash function for a hash table instead of linear search
 			for(i = 0; i < ARRLEN(ParseMap); i++)
@@ -237,10 +237,11 @@ global int parse(struct parser *parser)
 		else if(tokischar(&parser->tok, '}'))
 		{
 			// exit scope
-			if(parser->scopeCnt == 1)
+			int cnt = arrcount(parser->scopes);
+			if(cnt == 1)
 				err = psthrow(parser, "closing '}' doesn't match with an open one");
 			else
-				parser->scopeCnt--;
+				arrremove(parser->scopes, cnt - 1);
 		}
 		else if(parser->tok.type == TOKWORD)
 		{
@@ -251,6 +252,6 @@ global int parse(struct parser *parser)
 		{
 			err = psthrow(parser, "invalid token(%d)", parser->tok.type);
 		}
-    }
-    return err;
+	}
+	return err;
 }
