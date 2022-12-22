@@ -1,6 +1,6 @@
 /* Array utility */
 struct array {
-	u32 cap, cnt, size;
+	u32 cap, cnt, size, cursor;
 	u8 elems[0];
 };
 
@@ -33,10 +33,18 @@ void *arrcreate(u32 initCap, u32 elemSize);
 u32 arrcount(void *ptr);
 // grows to given capacity
 void *arrgrow(void *ptr, u32 cap);
-// adds a new element
+// moves to the cursor, returns the old cursor position
+u32 arrmovecursor(void *ptr, u32 cursor);
+// adds a new element at the cursor position and moves the cursor on to the right
 void *arradd(void *ptr, const void *elem);
-// removes an element
+// removes an element at given index, if the cursor is outside the array, it moves it accordingly
 void *arrremove(void *ptr, u32 index);
+// same as arradd
+void *arrpush(void *ptr, const void *elem);
+// returns the element that is at the cursor or NULL if there are no elements
+void *arrpeek(void *ptr);
+// returns the element that is at the cursor or NULL if there are no elements, it also removes that element
+void *arrpop(void *ptr);
 // finds given element and using given compare function
 void *arrfind(void *ptr, const void *elem, comparator compare);
 // finds a pointer by comparing the address of each pointer element with the given element like this:
