@@ -1,4 +1,5 @@
 // parses a type
+// note: when this function is called, a token is already read, so no need to call an initial psreadtok
 
 // examples of input:
 // db
