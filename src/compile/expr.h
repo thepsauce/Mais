@@ -11,6 +11,8 @@
 // ?
 // 41 * (31 + 42 * (22 - 3))
 // f(x) * 33 * f(f(x))
+// object.member.function(a)
+// object.arrMember[3].function(a, b)
 
 int parseexpr(struct parser *parser, struct group *group)
 {
