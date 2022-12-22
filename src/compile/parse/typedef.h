@@ -7,7 +7,7 @@
 // typedef D : A
 // typedef E : C<dd>
 // typedef F<N> : C< <N> >
-int parsetypedef(struct parser *parser, struct label *label)
+int parsetypedef(struct parser *parser)
 {
 
 	return 0;
