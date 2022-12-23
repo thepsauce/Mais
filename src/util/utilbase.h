@@ -30,7 +30,11 @@ arrfree(array);
 // creates a new array
 void *arrcreate(u32 initCap, u32 elemSize);
 // returns the number of elements
-u32 arrcount(void *ptr);
+#define arrcount(ptr) (((struct array*) ((void*) ptr - sizeof(struct array)))->cnt)
+// returns capacity
+#define arrcapacity(ptr) (((struct array*) ((void*) ptr - sizeof(struct array))))->cap)
+// returns cursor
+#define arrcursor(ptr) (((struct array*) ((void*) ptr - sizeof(struct array))))->cursor)
 // grows to given capacity
 void *arrgrow(void *ptr, u32 cap);
 // moves to the cursor, returns the old cursor position
