@@ -39,13 +39,6 @@ bool bufsl(Buf buf, const char *str, int len)
         free(buf->buf);
         buf->len = buf->cap = 0;
     }
-    else if(buf->cap < len)
-    {
-        free(buf->buf);
-        buf->cap = len;
-        buf->len = 0;
-        buf->buf = malloc(len);
-    }
     return 0;
 }
 
@@ -68,7 +61,7 @@ char *bufex(Buf buf)
     return str;
 }
 
-char *bufcv(Buf buf, int index, int len)
+char *bufcpy(Buf buf, int index, int len)
 {
     char *str;
     str = malloc(len + 1);
@@ -77,27 +70,48 @@ char *bufcv(Buf buf, int index, int len)
     return str;
 }
 
+int bufaf(Buf buf, const char *fmt, ...)
+{
+	int c;
+	va_list l;
+	va_start(l, fmt);
+    c = bufivf(buf, buf->len, fmt, l);
+	va_end(l);
+	return c;
+}
 
-int buff(Buf buf, const char *fmt, ...)
+int bufif(Buf buf, int index, const char *fmt, ...)
+{
+	int c;
+	va_list l;
+	va_start(l, fmt);
+    c = bufivf(buf, index, fmt, l);
+	va_end(l);
+	return c;
+}
+
+int bufavf(Buf buf, const char *fmt, va_list l)
+{
+	return bufivf(buf, buf->len, fmt, l);
+}
+
+int bufivf(Buf buf, int index, const char *fmt, va_list l)
 {
     int len;
-
-    va_list l;
-    va_start(l, fmt);
+	char *dest;
+	char ch;
+	
+	// get length of string to insert
     len = _vscprintf(fmt, l);
-    va_end(l);
-
-    if(buf->len + len + 1 > buf->cap)
-    {
-        buf->cap *= 2;
-        buf->cap += len + 1; // plus one because vsprinf also writes a null terminator
-        buf->buf = realloc(buf->buf, buf->cap);
-    }
-
-    va_start(l, fmt);
-    vsprintf(buf->buf + buf->len, fmt, l);
-    va_end(l);
-
+	bufgrow(buf, buf->len + len + 1);
+	// move out of the way
+	dest = buf->buf + index;
+	memmove(dest + len, dest, buf->len - index);
+	ch = dest[len];
+	// insert string
+    vsprintf(dest, fmt, l);
+	// since vsprintf writes a null terminator, this must be overwritten again
+	dest[len] = ch;
     buf->len += len;
     return len;
 }
@@ -114,19 +128,14 @@ char *bufasl(Buf buf, const char *apd, int len)
 
 char *bufic(Buf buf, int index, char ch)
 {
-    char *txt;
-    int bufLen;
-    bufLen = buf->len++;
-    if(buf->len > buf->cap)
-    {
-        buf->cap *= 2;
-        buf->cap++;
-        buf->buf = realloc(buf->buf, buf->cap);
-    }
-    txt = buf->buf + index;
-    memmove(txt + 1, txt, bufLen - index);
-    *txt = ch;
-    return txt;
+    char *dest;
+
+	bufgrow(buf, buf->len + 1);
+    dest = buf->buf + index;
+    memmove(dest + 1, dest, buf->len - index);
+    *dest = ch;
+	buf->len++;
+    return dest;
 }
 
 char *bufac(Buf buf, char ch)
@@ -141,23 +150,17 @@ char *bufis(Buf buf, int index, const char *ins)
 
 char *bufisl(Buf buf, int index, const char *ins, int len)
 {
-    char *txt;
-    int bufLen;
-    bufLen = buf->len;
-    buf->len += len;
-    if(buf->len > buf->cap)
-    {
-        buf->cap *= 2;
-        buf->cap += len;
-        buf->buf = realloc(buf->buf, buf->cap);
-    }
-    txt = buf->buf + index;
-    memmove(txt + len, txt, bufLen - index);
+    char *dest;
+
+	bufgrow(buf, buf->len + len);
+    dest = buf->buf + index;
+    memmove(dest + len, dest, buf->len - index);
     if(ins)
-        memcpy(txt, ins, len);
+        memcpy(dest, ins, len);
     else
-        memset(txt, 0, len);
-    return txt;
+        memset(dest, 0, len);
+    buf->len += len;
+    return dest;
 }
 
 char *bufris(Buf buf, int index, int rem, const char *ins)
@@ -167,37 +170,31 @@ char *bufris(Buf buf, int index, int rem, const char *ins)
 
 char *bufrisl(Buf buf, int index, int rem, const char *ins, int len)
 {
-    char *txt;
-    int bufLen;
+    char *dest;
     int delta;
+	
     delta = len - rem;
-    bufLen = buf->len;
-    buf->len += delta;
     if(delta > 0)
     {
-        if(buf->len > buf->cap)
-        {
-            buf->cap *= 2;
-            buf->cap += delta;
-            buf->buf = realloc(buf->buf, buf->cap);
-        }
-        txt = buf->buf + index;
-        memmove(txt + delta, txt, bufLen - index);
+		bufgrow(buf, buf->len + delta);
+        dest = buf->buf + index;
+        memmove(dest + delta, dest, buf->len - index);
     }
     else if(delta < 0)
     {
-        txt = buf->buf + index;
-        memmove(txt, txt - delta, bufLen - index);
+        dest = buf->buf + index;
+        memmove(dest, dest - delta, buf->len - index);
     }
     else
     {
-        txt = buf->buf + index;
+        dest = buf->buf + index;
     }
     if(ins)
-        memcpy(txt, ins, len);
+        memcpy(dest, ins, len);
     else
-        memset(txt, 0, len);
-    return txt;
+        memset(dest, 0, len);
+    buf->len += delta;
+    return dest;
 }
 
 bool bufrra(Buf buf, int fromIndex, int removeLen)
@@ -209,21 +206,32 @@ bool bufrra(Buf buf, int fromIndex, int removeLen)
 
 int buffc(Buf buf, char ch, int fromIndex)
 {
-    char *str = buf->buf + fromIndex;
-    int len = buf->len - fromIndex;
-    while(len--)
-        if(*(str++) == ch)
-            return buf->len - len - 1;
+	char *str;
+	int len;
+	if(!buf->len)
+		return -1;
+	if(fromIndex < 0)
+		fromIndex = 0;
+	for(len = buf->len - fromIndex, str = buf->buf + fromIndex; len; len--, str++)
+        if(*str == ch)
+            return buf->len - len;
     return -1;
 }
 
 int buffcr(Buf buf, char ch, int fromIndex)
 {
-    char *str = buf->buf + fromIndex;
-    int len = fromIndex;
-    while(len--)
-        if(*(str--) == ch)
-            return buf->len - len - 1;
+	char *str;
+	int len;
+	if(!buf->len)
+		return -1;
+	if(fromIndex < 0)
+		fromIndex = buf->len - 1;
+	for(len = fromIndex + 1, str = buf->buf + fromIndex; len; str--)
+	{
+		len--;
+        if(*str == ch)
+            return len;
+	}
     return -1;
 }
 
@@ -249,8 +257,9 @@ static inline int _buffsl(const char * restrict str, int len, const char * restr
     }*/
 	str += fromIndex;
 	len -= fromIndex;
-    while(len--)
+    while(len)
     {
+		len--;
         if(*(find + matchCnt) == *str)
         {
             matchCnt++;
@@ -273,45 +282,44 @@ int buffs(Buf buf, const char * restrict find, int fromIndex)
 
 int buffsl(Buf buf, const char * restrict find, int findLen, int fromIndex)
 {
+	if(fromIndex < 0)
+		fromIndex = 0;
     if(!find || !findLen)
         return -1;
     return _buffsl(buf->buf, buf->len, find, findLen, fromIndex);
 }
 
-int buffrs(Buf buf, const char * restrict find, int fromIndex, const char * restrict replace)
+int buffsrs(Buf buf, const char * restrict find, int fromIndex, const char * restrict replace)
 {
-	return bufflrsl(buf, find, strlen(find), fromIndex, replace, strlen(replace));
+	return buffslrsl(buf, find, strlen(find), fromIndex, replace, strlen(replace));
 }
 
-int buffrsl(Buf buf, const char * restrict find, int fromIndex, const char * restrict replace, int replaceLen)
+int buffsrsl(Buf buf, const char * restrict find, int fromIndex, const char * restrict replace, int replaceLen)
 {
-	return bufflrsl(buf, find, strlen(find), fromIndex, replace, replaceLen);
+	return buffslrsl(buf, find, strlen(find), fromIndex, replace, replaceLen);
 }
 
-int bufflrs(Buf buf, const char * restrict find, int findLen, int fromIndex, const char * restrict replace)
+int buffslrs(Buf buf, const char * restrict find, int findLen, int fromIndex, const char * restrict replace)
 {
-	return bufflrsl(buf, find, findLen, fromIndex, replace, strlen(replace));
+	return buffslrsl(buf, find, findLen, fromIndex, replace, strlen(replace));
 }
 
-int bufflrsl(Buf buf, const char * restrict find, int findLen, int fromIndex, const char * restrict replace, int replaceLen)
+int buffslrsl(Buf buf, const char * restrict find, int findLen, int fromIndex, const char * restrict replace, int replaceLen)
 {
-    char *txt;
+    char *dest;
     int aLen;
     int index;
     if(!find || !findLen)
         return -1;
+	if(fromIndex < 0)
+		fromIndex = 0;
     if((index = _buffsl(buf->buf, buf->len, find, findLen, fromIndex)) < 0)
         return -1;
     aLen = findLen - replaceLen;
-	if(buf->len + aLen > buf->cap)
-	{
-		buf->cap *= 2;
-		buf->cap += aLen;
-		buf->buf = realloc(buf->buf, buf->cap);
-	}
-    txt = buf->buf + index;
-    memmove(txt, txt + aLen, buf->len - index - aLen);
-    memcpy(txt, replace, replaceLen);
+	bufgrow(buf, buf->len - aLen);
+    dest = buf->buf + index;
+    memmove(dest, dest + aLen, buf->len - index - aLen);
+    memcpy(dest, replace, replaceLen);
     buf->len -= aLen;
     return index;
 }
