@@ -3,6 +3,7 @@ global void *arrcreate(u32 initCap, u32 elemSize)
 	struct array *arr = malloc(sizeof(*arr) + elemSize * initCap);
 	arr->cap = initCap;
 	arr->cnt = 0;
+	arr->cursor = 0;
 	arr->size = elemSize;
 	return (void*) arr + sizeof(*arr);
 }
