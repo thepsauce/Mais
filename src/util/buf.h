@@ -78,29 +78,29 @@ char *bufcv(Buf buf, int index, int len)
 }
 
 
-int buff(Buf buf, const char *fmt, ...)
-{
-    int len;
+// int buff(Buf buf, const char *fmt, ...)
+// {
+//     int len;
 
-    va_list l;
-    va_start(l, fmt);
-    len = _vscprintf(fmt, l);
-    va_end(l);
+//     va_list l;
+//     va_start(l, fmt);
+//     len = _vscprintf(fmt, l);
+//     va_end(l);
 
-    if(buf->len + len + 1 > buf->cap)
-    {
-        buf->cap *= 2;
-        buf->cap += len + 1; // plus one because vsprinf also writes a null terminator
-        buf->buf = realloc(buf->buf, buf->cap);
-    }
+//     if(buf->len + len + 1 > buf->cap)
+//     {
+//         buf->cap *= 2;
+//         buf->cap += len + 1; // plus one because vsprinf also writes a null terminator
+//         buf->buf = realloc(buf->buf, buf->cap);
+//     }
 
-    va_start(l, fmt);
-    vsprintf(buf->buf + buf->len, fmt, l);
-    va_end(l);
+//     va_start(l, fmt);
+//     vsprintf(buf->buf + buf->len, fmt, l);
+//     va_end(l);
 
-    buf->len += len;
-    return len;
-}
+//     buf->len += len;
+//     return len;
+// }
 
 char *bufas(Buf buf, const char *apd)
 {

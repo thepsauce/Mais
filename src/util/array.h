@@ -4,7 +4,7 @@ global void *arrcreate(u32 initCap, u32 elemSize)
 	arr->cap = initCap;
 	arr->cnt = 0;
 	arr->size = elemSize;
-	return (void*) arr + sizeof(*arr);
+	return (void*) arr + sizeof(*arr);  //returns a pointer to the last element of the array
 }
 
 global u32 arrcount(void *ptr)
