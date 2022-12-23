@@ -47,7 +47,7 @@ void *arrremove(void *ptr, u32 index);
 void *arrpush(void *ptr, const void *elem);
 // returns the element that is at the cursor or NULL if there are no elements
 void *arrpeek(void *ptr);
-// returns the element that is at the cursor or NULL if there are no elements, it also removes that element
+// returns the element that is at the cursor, and removes that element from the array, or NULL if there are no elements
 void *arrpop(void *ptr);
 // finds given element and using given compare function
 void *arrfind(void *ptr, const void *elem, comparator compare);
