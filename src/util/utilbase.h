@@ -95,6 +95,17 @@ void bufinits(Buf buf, const char *str);
 // initialize buffer to any string of length len
 void bufinitsl(Buf buf, const char *str, int len);
 // important: all the following buffer functions should only be used after the buffer was initialized
+#define bufgrow(b, newCap) \
+{ \
+	Buf _BUFGROW_b = (b); \
+	int _BUFGROW_delta = (newCap) - _BUFGROW_b->cap; \
+	if(_BUFGROW_delta > 0) \
+	{ \
+		_BUFGROW_b->cap *= 2; \
+		_BUFGROW_b->cap += _BUFGROW_delta; \
+		_BUFGROW_b->buf = realloc(_BUFGROW_b->buf, _BUFGROW_b->cap); \
+	} \
+}
 // set length of buffer
 #define bufl(b, l) ((b)->len = (l))
 // sets buffer to a string
