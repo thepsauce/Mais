@@ -1,6 +1,6 @@
 /* Array utility */
 struct array {
-	u32 cap, cnt, size;
+	u32 cap, cnt, size, cursor;
 	u8 elems[0];
 };
 
@@ -30,13 +30,25 @@ arrfree(array);
 // creates a new array
 void *arrcreate(u32 initCap, u32 elemSize);
 // returns the number of elements
-u32 arrcount(void *ptr);
+#define arrcount(ptr) (((struct array*) ((void*) ptr - sizeof(struct array)))->cnt)
+// returns capacity
+#define arrcapacity(ptr) (((struct array*) ((void*) ptr - sizeof(struct array))))->cap)
+// returns cursor
+#define arrcursor(ptr) (((struct array*) ((void*) ptr - sizeof(struct array))))->cursor)
 // grows to given capacity
 void *arrgrow(void *ptr, u32 cap);
-// adds a new element
+// moves to the cursor, returns the old cursor position
+u32 arrmovecursor(void *ptr, u32 cursor);
+// adds a new element at the cursor position and moves the cursor on to the right
 void *arradd(void *ptr, const void *elem);
-// removes an element
+// removes an element at given index, if the cursor is outside the array, it moves it accordingly
 void *arrremove(void *ptr, u32 index);
+// same as arradd
+void *arrpush(void *ptr, const void *elem);
+// returns the element that is at the cursor or NULL if there are no elements
+void *arrpeek(void *ptr);
+// returns the element that is at the cursor or NULL if there are no elements, it also removes that element
+void *arrpop(void *ptr);
 // finds given element and using given compare function
 void *arrfind(void *ptr, const void *elem, comparator compare);
 // finds a pointer by comparing the address of each pointer element with the given element like this:
@@ -121,10 +133,10 @@ int buffcr(Buf buf, char ch, int fromIndex);
 int buffs(Buf buf, const char * restrict find, int fromIndex);
 int buffsl(Buf buf, const char * restrict find, int findLen, int fromIndex);
 // finds given string inside the buffer and replaces it with given string
-int buffrs(Buf buf, const char * restrict find, int fromIndex, const char * restrict replace);
-int buffrsl(Buf buf, const char * restrict find, int fromIndex, const char * restrict replace, int replaceLen);
-int bufflrs(Buf buf, const char * restrict find, int findLen, int fromIndex, const char * restrict replace);
-int bufflrsl(Buf buf, const char * restrict find, int findLen, int fromIndex, const char * restrict replace, int replaceLen);
+int buffsrs(Buf buf, const char * restrict find, int fromIndex, const char * restrict replace);
+int buffsrsl(Buf buf, const char * restrict find, int fromIndex, const char * restrict replace, int replaceLen);
+int buffslrs(Buf buf, const char * restrict find, int findLen, int fromIndex, const char * restrict replace);
+int buffslrsl(Buf buf, const char * restrict find, int findLen, int fromIndex, const char * restrict replace, int replaceLen);
 
 // returns whether two floats are equal, prec is the precision used
 #define F32EQUAL(f1, f2, prec) (fabsf((f2) - (f1))>=prec)
