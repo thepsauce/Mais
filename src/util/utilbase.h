@@ -39,7 +39,7 @@ void *arrcreate(u32 initCap, u32 elemSize);
 void *arrgrow(void *ptr, u32 cap);
 // moves to the cursor, returns the old cursor position
 u32 arrmovecursor(void *ptr, u32 cursor);
-// adds a new element at the cursor position and moves the cursor on to the right
+// adds a new element at the cursor position and moves the cursor one to the right
 void *arradd(void *ptr, const void *elem);
 // removes an element at given index, if the cursor is outside the array, it moves it accordingly
 void *arrremove(void *ptr, u32 index);
