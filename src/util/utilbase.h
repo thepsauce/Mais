@@ -14,9 +14,9 @@ int index;
 
 array = arrcreate(10, sizeof*array);
 // note that we have to say array = ... because the pointer might change due to realloc but if you are sure that your array has enough capacity, you may omit it
-array = arradd(array, 22);
-arradd(array, 41);
-arradd(array, 0);
+array = arradd(array, &(int) { 22 });
+arradd(array, &(int) { 41 });
+arradd(array,&(int) {  0 });
 result = arrfindmem(array, &(int) {  41 });
 if(result)
 {
