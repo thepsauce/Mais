@@ -42,7 +42,6 @@ global void *arradd(void *ptr, const void *elem)
 		memcpy(newArr, arr, sizeof(*arr) + arr->size * arr->cursor);
 		// copy the new element
 		dest = (void*) newArr + sizeof(*arr) + arr->size * arr->cursor; 
-		memcpy(dest, elem, arr->size);
 		// copy tail of previous array to new array
 		memcpy(dest + arr->size, 
 			ptr + arr->size * arr->cursor,
@@ -57,8 +56,11 @@ global void *arradd(void *ptr, const void *elem)
 	{
 		dest = ptr + arr->size * arr->cursor; 
 		memmove(dest + arr->size, dest, arr->size * (arr->cnt - arr->cursor));
-		memcpy(dest, elem, arr->size);
 	}
+	if(elem)
+		memcpy(dest, elem, arr->size);
+	else
+		memset(dest, 0, arr->size);
 	arr->cnt++;
 	arr->cursor++;
 	return ptr;
