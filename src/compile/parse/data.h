@@ -1,5 +1,4 @@
 // parse tokens to data points
-// note: when this function is called, a token is already read, so no need to call an initial psreadtok
 
 // examples of input:
 // db 0 => (u8) 0

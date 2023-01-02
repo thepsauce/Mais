@@ -75,7 +75,7 @@ int bufaf(Buf buf, const char *fmt, ...)
 	int c;
 	va_list l;
 	va_start(l, fmt);
-	c = bufivf(buf, buf->len, fmt, l);
+    c = bufivf(buf, buf->len, fmt, l);
 	va_end(l);
 	return c;
 }
@@ -85,7 +85,7 @@ int bufif(Buf buf, int index, const char *fmt, ...)
 	int c;
 	va_list l;
 	va_start(l, fmt);
-	c = bufivf(buf, index, fmt, l);
+    c = bufivf(buf, index, fmt, l);
 	va_end(l);
 	return c;
 }
@@ -97,24 +97,24 @@ int bufavf(Buf buf, const char *fmt, va_list l)
 
 int bufivf(Buf buf, int index, const char *fmt, va_list l)
 {
-	int len;
+    int len;
 	char *dest;
 	char ch;
 	
 	// get length of string to insert
-	// len = _vscprintf(fmt, l);
-	len = vsnprintf(NULL, 0, fmt, l); // this seems to be more portable than _vscprintf
+    // len = _vscprintf(fmt, l);
+    len = vsnprintf(NULL, 0, fmt, l); // this seems to be more portable than _vscprintf
 	bufgrow(buf, buf->len + len + 1);
 	// move out of the way
 	dest = buf->buf + index;
 	memmove(dest + len, dest, buf->len - index);
 	ch = dest[len];
 	// insert string
-	vsprintf(dest, fmt, l);
+    vsprintf(dest, fmt, l);
 	// since vsprintf writes a null terminator, this must be overwritten again
 	dest[len] = ch;
-	buf->len += len;
-	return len;
+    buf->len += len;
+    return len;
 }
 
 char *bufas(Buf buf, const char *apd)

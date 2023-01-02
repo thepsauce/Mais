@@ -50,7 +50,7 @@ struct parser {
 	long fOff; // offset of buf inside the actual file
 	bool stayOnToken; // if this is true, psreadtok doesn't do anything (set on a previous call
 	int lastTokRet; // last return value of 'pspeektok'
-	bool failOnEof; // if this is true and psreadtok would return eof, an error is returned
+	bool failOnEof; // if this is true and psreadtok would return eof, an error is thrown with psthrow
 	
 	int *scopes; // this array stores indexes in the labels array, this way, we only need to keep one label array
 	struct label *labels; // this array stores all labels like variables, functions, typedefs and gotos
@@ -80,10 +80,14 @@ int psreadtok(struct parser *parser);
 int pspeektok(struct parser *parser);
 // throws an error
 int psthrow(struct parser *parser, const char *format, ...);
+// thors a warning
+int pswarn(struct parser *parser, const char *format, ...);
 // adds a new label to this parser, if push is true, this label is also pushed to the scope stack
 int psaddlabel(struct parser *parser, const struct label *label, bool push);
 // adds a new group to this parser
 int psaddgroup(struct parser *parser, const struct group *group);
+// parses the current file
+int parse(struct parser *parser);
 
 const char *Keywords[] = {
     "db", "dw", "dd", "dq", "dt", "dr", "df",

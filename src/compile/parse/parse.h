@@ -3,10 +3,10 @@ global int psinit(struct parser *parser)
 	memset(parser, 0, sizeof(*parser));
 	
 	parser->scopes = arrcreate(10, sizeof*parser->scopes);
-	arradd(parser->scopes, &(int) { 0 });
+	arradd(parser->scopes, NULL);
 	
 	parser->labels = arrcreate(10, sizeof*parser->labels);
-	memset(arradd(parser->labels, NULL), 0, sizeof(*parser->labels));
+	arradd(parser->labels, NULL);
 #ifdef __WIN32
 	parser->hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     GetConsoleScreenBufferInfo(parser->hOut, &parser->csbiInfo);
@@ -149,7 +149,7 @@ global int psthrow(struct parser *parser, const char *format, ...)
 	printf(" error: ");
 	SetConsoleTextAttribute(parser->hOut, parser->csbiInfo.wAttributes);
 #else
-    printf("%s:%d:%d: error: ", parser->fileName, line, col);
+    printf("\e[1m%s\e[0m:\e[1m%d\e[0m:\e[1m%d\e[0m: \e[33merror: \e[0m", parser->fileName, line, col);
 #endif
     va_start(args, format);
     vprintf(format, args);
@@ -219,8 +219,8 @@ global int parse(struct parser *parser)
 {
 	int err = 0;
 	int i;
-	while(parser->failOnEof = 0, psreadtok(parser) != EOF)
-	{
+    while(parser->failOnEof = 0, psreadtok(parser) != EOF)
+    {
 		parser->failOnEof = 1;
 		if(parser->tok.type == TOKKEYWORD)
 		{
@@ -237,8 +237,7 @@ global int parse(struct parser *parser)
 		else if(tokischar(&parser->tok, '}'))
 		{
 			// exit scope
-			int cnt = arrcount(parser->scopes);
-			if(cnt == 1)
+			if(arrcount(parser->scopes) == 1)
 				err = psthrow(parser, "closing '}' doesn't match with an open one");
 			else
 				arrpop(parser->scopes);
@@ -252,6 +251,6 @@ global int parse(struct parser *parser)
 		{
 			err = psthrow(parser, "invalid token(%d)", parser->tok.type);
 		}
-	}
-	return err;
+    }
+    return err;
 }

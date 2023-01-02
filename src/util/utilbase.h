@@ -14,9 +14,9 @@ int index;
 
 array = arrcreate(10, sizeof*array);
 // note that we have to say array = ... because the pointer might change due to realloc but if you are sure that your array has enough capacity, you may omit it
-array = arradd(array, &(int) { 22 });
-arradd(array, &(int) { 41 });
-arradd(array,&(int) {  0 });
+array = arradd(array, 22);
+arradd(array, 41);
+arradd(array, 0);
 result = arrfindmem(array, &(int) {  41 });
 if(result)
 {
@@ -32,14 +32,14 @@ void *arrcreate(u32 initCap, u32 elemSize);
 // returns the number of elements
 #define arrcount(ptr) (((struct array*) ((void*) ptr - sizeof(struct array)))->cnt)
 // returns capacity
-#define arrcapacity(ptr) (((struct array*) ((void*) ptr - sizeof(struct array))))->cap)
+#define arrcapacity(ptr) (((struct array*) ((void*) ptr - sizeof(struct array)))->cap)
 // returns cursor
-#define arrcursor(ptr) (((struct array*) ((void*) ptr - sizeof(struct array))))->cursor)
+#define arrcursor(ptr) (((struct array*) ((void*) ptr - sizeof(struct array)))->cursor)
 // grows to given capacity
 void *arrgrow(void *ptr, u32 cap);
 // moves to the cursor, returns the old cursor position
 u32 arrmovecursor(void *ptr, u32 cursor);
-// adds a new element at the cursor position and moves the cursor one to the right
+// adds a new element at the cursor position and moves the cursor on to the right
 void *arradd(void *ptr, const void *elem);
 // removes an element at given index, if the cursor is outside the array, it moves it accordingly
 void *arrremove(void *ptr, u32 index);
@@ -47,7 +47,7 @@ void *arrremove(void *ptr, u32 index);
 void *arrpush(void *ptr, const void *elem);
 // returns the element that is at the cursor or NULL if there are no elements
 void *arrpeek(void *ptr);
-// returns the element that is at the cursor, and removes that element from the array, or NULL if there are no elements
+// returns the element that is at the cursor or NULL if there are no elements, it also removes that element
 void *arrpop(void *ptr);
 // finds given element and using given compare function
 void *arrfind(void *ptr, const void *elem, comparator compare);
@@ -107,7 +107,7 @@ void bufinitsl(Buf buf, const char *str, int len);
 	} \
 }
 // set length of buffer
-#define bufl(b, l) ((b)->len = (l))
+#define buflen(b, l) ((b)->len = (l))
 // sets buffer to a string
 bool bufs(Buf buf, const char *str);
 bool bufsl(Buf buf, const char *str, int len);
@@ -118,7 +118,11 @@ char *bufexd(Buf buf);
 // extracts this buffer as null-terminated string but doesn't free it
 char *bufex(Buf buf);
 // appends the string with given format and var args, similar to sprintf
-int buff(Buf buf, const char *fmt, ...);
+int bufaf(Buf buf, const char *fmt, ...);
+int bufavf(Buf buf, const char *fmt, va_list l);
+// inserts the format
+int bufif(Buf buf, int index, const char *fmt, ...);
+int bufivf(Buf buf, int index, const char *fmt, va_list l);
 // appends a string
 char *bufas(Buf buf, const char *apd);
 char *bufasl(Buf buf, const char *apd, int len);
@@ -136,9 +140,9 @@ char *bufrisl(Buf buf, int index, int rem, const char *ins, int len);
 #define bufrca(b, index) bufrra((b), (index), 1)
 // removes range from fromIndex to fromIndex+removeLen
 bool bufrra(Buf buf, int fromIndex, int removeLen);
-// finds given char, starting from the index
+// finds given char, starting from the index, put in -1 to start from the beginning
 int buffc(Buf buf, char ch, int fromIndex);
-// does the same as buffc but searching in reverse
+// does the same as buffc but searching in reverse, put in -1 to start from the end
 int buffcr(Buf buf, char ch, int fromIndex);
 // finds given string inside this buffer
 int buffs(Buf buf, const char * restrict find, int fromIndex);

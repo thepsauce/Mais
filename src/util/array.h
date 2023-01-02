@@ -8,6 +8,12 @@ global void *arrcreate(u32 initCap, u32 elemSize)
 	return (void*) arr + sizeof(*arr);
 }
 
+/*global u32 arrcount(void *ptr)
+{
+	struct array *arr = ptr - sizeof(*arr);
+	return arr->cnt;
+}*/
+
 global u32 arrmovecursor(void *ptr, u32 pos)
 {
 	struct array *arr = ptr - sizeof(*arr);
